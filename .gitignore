@@ -4,7 +4,7 @@
 /build
 
 # store data 
-/data
+data/
 
 # Logs
 logs
