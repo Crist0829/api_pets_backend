@@ -20,6 +20,9 @@ export class Users {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: string
 
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    updated_at: string
+
     @OneToMany(() => Pets, pets => pets.user)
     pets : Pets[]
 

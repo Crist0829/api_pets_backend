@@ -1,38 +1,27 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableForeignKey,
+} from 'typeorm'
 
-export class CreatePetsTable1716758482370 implements MigrationInterface {
-  name = 'CreatePetsTable1716758482370';
-
+export class PetImageLikes1729985339560 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'pets',
+        name: 'pet_image_likes',
         columns: [
           {
             name: 'id',
             type: 'int',
-            isPrimary: true,
             isGenerated: true,
+            isPrimary: true,
             generationStrategy: 'increment',
           },
           {
-            name: 'name',
-            type: 'varchar',
+            name: 'pet_id',
+            type: 'int',
             isNullable: false,
-          },
-          {
-            name: 'type',
-            type: 'enum',
-            enum: ['dog', 'cat', 'other'],
-            isNullable: false,
-            default: "'other'",
-          },
-          {
-            name: 'rating',
-            type: 'tinyint',
-            unsigned: true,
-            isNullable: false,
-            default: 3,
           },
           {
             name: 'user_id',
@@ -53,20 +42,30 @@ export class CreatePetsTable1716758482370 implements MigrationInterface {
           },
         ],
       }),
-    );
+    )
 
     await queryRunner.createForeignKey(
-      'pets',
+      'pet_image_likes',
       new TableForeignKey({
         columnNames: ['user_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'users',
         onDelete: 'CASCADE',
       }),
-    );
+    )
+
+    await queryRunner.createForeignKey(
+      'pet_image_likes',
+      new TableForeignKey({
+        columnNames: ['pet_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'pets',
+        onDelete: 'CASCADE',
+      }),
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('pets');
+    queryRunner.dropTable('pet_imagen_likes')
   }
 }
