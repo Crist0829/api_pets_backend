@@ -15,7 +15,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async login(loginDto : LoginDto): Promise<{access_token : string } | { error : string }> {
+  async login(loginDto : LoginDto){
 
     let user = await this.userRepository.findOne({ where: { email: loginDto.email } });
 
@@ -34,13 +34,16 @@ export class AuthService {
     const payload = { id: user.id, name : user.name };
 
     return {
+        id : user.id,
+        name : user.name,
+        email : user.email,
         access_token : await this.jwtService.signAsync(payload)
     }
     
   }
 
 
-  async register( createUserDto : CreateUserDto ) : Promise<{access_token : string} | { error : string}> {
+  async register( createUserDto : CreateUserDto ) {
 
     let user = await this.userRepository.findOne({ where: { email: createUserDto.email } });
 
@@ -60,6 +63,8 @@ export class AuthService {
     const payload = { id: user.id, name : user.name };
 
     return {
+        name : createUserDto.name,
+        email : createUserDto.email,
         access_token : await this.jwtService.signAsync(payload)
     }
 

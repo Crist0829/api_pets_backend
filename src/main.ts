@@ -18,6 +18,10 @@ async function bootstrap() {
     },
   });
 
+  app.enableCors({
+    origin: '*',
+  });
+
   //app.useGlobalInterceptors(new ResponseInterceptor());
   await app.listen(3000);
 }

@@ -12,6 +12,7 @@ import { Users } from 'src/users/entities/users.entity'
 import { ResponseFormat } from 'src/common/response.fomat'
 import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices'
 import * as fs from 'fs';
+import { classToPlain } from 'class-transformer'
 
 @Injectable()
 export class PetsService {
@@ -66,7 +67,12 @@ export class PetsService {
   }
 
   async findAll(): Promise<ResponseFormat<Pets[]>> {
-    const pets = await this.petsRepository.find()
+    const pets = await this.petsRepository.createQueryBuilder('pets')
+    .leftJoin('pets.images', 'images')
+    .leftJoin('pets.user', 'user')
+    .addSelect(['user.id', 'user.name'])
+    .addSelect(['images.id', 'images.url']) 
+    .getMany();
     return { data: pets, message: 'Pets Founded' }
   }
 
@@ -97,15 +103,23 @@ export class PetsService {
 
   async findByUser(userId: number) {
     const user = await this.userRepository.findOne({ where: { id: userId } })
-    const pets = await this.petsRepository.find({ where: { user: user } })
+
+    const pets = await this.petsRepository.createQueryBuilder('pets')
+    .leftJoin('pets.images', 'images')
+    .leftJoin('pets.user', 'user')
+    .addSelect(['user.id', 'user.name'])
+    .addSelect(['images.id', 'images.url'])
+    .where('pets.user_id = :userId', { userId })
+    .getMany()
     return { data: pets, message: 'Pets founded' }
   }
 
-  async uploadImage(userId : number, file : Express.Multer.File, petId : string | null){
+  async uploadImage(userId : number, file : Express.Multer.File, petId : string | null, name : string){
     
   const imageUrl = `http://localhost:3000/uploads/${file.filename}`;
   
   const payload = {
+    name,
     petId,
     userId,
     filename: file.originalname,

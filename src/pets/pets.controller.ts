@@ -7,6 +7,7 @@ import { Users } from 'src/users/entities/users.entity';
 import { AuthGuard } from 'src/auth/auth.guards';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { uploadInterceptor } from './uploadInterceptor';
+import { UploadImageDto } from './dto/upload-image.dto';
 
 
 @Controller('pets')
@@ -56,8 +57,9 @@ export class PetsController {
   @Post('/upload')
   @UseGuards(AuthGuard)
   @UseInterceptors(uploadInterceptor)
-  uploadPetImage(@UploadedFile() file: Express.Multer.File, @User() user : Users){
-    return this.petsService.uploadImage(user.id, file, null)
+  uploadPetImage(@Body(new ValidationPipe()) uploadImage : UploadImageDto, @UploadedFile() file: Express.Multer.File, @User() user : Users){
+
+    return this.petsService.uploadImage(user.id, file, uploadImage.petId, uploadImage.name)
   }
 
 
