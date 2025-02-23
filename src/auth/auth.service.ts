@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -17,27 +17,38 @@ export class AuthService {
 
   async login(loginDto : LoginDto){
 
-    let user = await this.userRepository.findOne({ where: { email: loginDto.email } });
+    let user = await this.userRepository.findOne({ where: { email: loginDto.username } });
 
     if (!user) {
+
       return {
-        error : 'No hay un usuario con ese email registrado'
+        status : 400,
+        "error" : "No existe un usuario con ese email"
       }
     }
 
-    if(!bcrypt.compare(loginDto.password, user.password)){
+    const result = await bcrypt.compare(loginDto.password, user.password)
+
+    if(!result){
         return {
+            status : 400,
             error : 'Contraseña incorrecta'
         }
     }
 
-    const payload = { id: user.id, name : user.name };
+    const payload = { id: user.id, username : user.email };
+    const refresh_token = await this.jwtService.signAsync(payload, {
+      secret : process.env.JWT_REFRESH_SECRET, 
+      expiresIn : '30d'
+    })
 
     return {
+        status : 200,
         id : user.id,
         name : user.name,
         email : user.email,
-        access_token : await this.jwtService.signAsync(payload)
+        access_token : await this.jwtService.signAsync(payload),
+        refresh_token
     }
     
   }
@@ -49,20 +60,31 @@ export class AuthService {
 
     if(user){
         return {
+            status : 400,
             error : 'Ya existe un usuario con ese email'
         }
     }
 
+    let payload = { id : 0, username : createUserDto.email };
+
+    const refresh_token = await this.jwtService.signAsync(payload, {
+      secret : process.env.JWT_REFRESH_SECRET, 
+      expiresIn : '30d'
+    })
+
     const userData = {
         name : createUserDto.name, 
         email : createUserDto.email, 
-        password : await bcrypt.hash(createUserDto.password, 10)
+        password : await bcrypt.hash(createUserDto.password, 10),
+        refresh_token
     }
 
     user =  await this.userRepository.save(userData)
-    const payload = { id: user.id, name : user.name };
+
+    payload = { id: user.id, username : user.email };
 
     return {
+        status : 200,
         name : createUserDto.name,
         email : createUserDto.email,
         access_token : await this.jwtService.signAsync(payload)

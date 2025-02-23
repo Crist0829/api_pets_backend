@@ -17,6 +17,10 @@ export class Users {
     @Exclude()
     password: string
 
+    @Column()
+    @Exclude()
+    refresh_token : string
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: string
 

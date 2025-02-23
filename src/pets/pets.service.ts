@@ -11,8 +11,7 @@ import { Repository } from 'typeorm'
 import { Users } from 'src/users/entities/users.entity'
 import { ResponseFormat } from 'src/common/response.fomat'
 import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices'
-import * as fs from 'fs';
-import { classToPlain } from 'class-transformer'
+
 
 @Injectable()
 export class PetsService {

@@ -6,23 +6,18 @@ import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   app.use('/uploads', express.static(join(__dirname, '../..', 'uploads')));
-
   app.connectMicroservice<MicroserviceOptions> ({
     transport: Transport.RMQ,
     options: {
-      urls: ['amqp://user:password@localhost:5672'], // Cambia según tus credenciales
+      urls: ['amqp://user:password@localhost:5672'],
       queue: 'image.uploaded',
       queueOptions: { durable: true },
     },
   });
-
   app.enableCors({
     origin: '*',
   });
-
-  //app.useGlobalInterceptors(new ResponseInterceptor());
   await app.listen(3000);
 }
 bootstrap();
